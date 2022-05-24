@@ -19,7 +19,7 @@ batch_size = 8
 train_size = 0.75
 least_samples = batch_size / (1 - train_size)
 
-
+# https://github.com/TsingZ0/PFL-Non-IID/blob/5c8406674d3ef4ea21fd8aca63ea530457f7bcc3/dataset/utils/dataset_utils.py
 def separate_data(data, num_clients, num_classes, niid=True, real=True, partition=None, balance=False,
                   class_per_client=2):
     X = [[] for _ in range(num_clients)]
@@ -50,10 +50,8 @@ def separate_data(data, num_clients, num_classes, niid=True, real=True, partitio
             if balance:
                 num_samples = [int(num_per) for _ in range(num_clients_ - 1)]
             else:
-                num_samples = np.random.randint(max(num_per / 10, least_samples / num_classes), num_per,
-                                                num_clients_ - 1).tolist()
+                num_samples = np.random.randint(max(num_per / 10, least_samples / num_classes), num_per, num_clients_ - 1).tolist()
             num_samples.append(num_all - sum(num_samples))
-
             if niid:
                 # each client is not sure to have all the labels
                 selected_clients = list(np.random.choice(selected_clients, num_clients_, replace=False))
@@ -68,7 +66,6 @@ def separate_data(data, num_clients, num_classes, niid=True, real=True, partitio
                 idx += num_sample
                 statistic[client].append((i, num_sample))
                 class_num_client[client] -= 1
-
     elif niid and partition == "dir":
         # https://github.com/IBM/probabilistic-federated-neural-matching/blob/master/experiment.py
         min_size = 0
@@ -150,7 +147,6 @@ def record_net_data_stats(y_train, net_dataidx_map):
         net_cls_counts[net_i] = tmp
     return net_cls_counts
 
-
 # https://github.com/IBM/probabilistic-federated-neural-matching/blob/master/datasets.py
 def partition_data(dataset, partition, n_nets, alpha=0.5):
     if dataset == 'mnist':
@@ -185,12 +181,10 @@ def partition_data(dataset, partition, n_nets, alpha=0.5):
     traindata_cls_counts = record_net_data_stats(y_train, net_dataidx_map)
     return X_train, y_train, X_test, y_test, net_dataidx_map, traindata_cls_counts
 
-
 if __name__ == '__main__':
     # trans_train_mnist = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
     # dataset_train = torchvision.datasets.MNIST('../Data/mnist/', train=True, download=True, transform=trans_train_mnist)
     # x, y, stat = separate_data((dataset_train.data, dataset_train.targets), 10, 10)
-
-    X_train, y_train, X_test, y_test, net_dataidx_map, traindata_cls_counts = partition_data(dataset='mnist', partition='homo', n_nets=11, alpha=0.5)
-    print(net_dataidx_map.keys())
-    print(traindata_cls_counts)
+    import pprint
+    X_train, y_train, X_test, y_test, net_dataidx_map, traindata_cls_counts = partition_data(dataset='mnist', partition='hetero-dir', n_nets=11, alpha=0.5)
+    pprint.pprint(traindata_cls_counts)
