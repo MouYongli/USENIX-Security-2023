@@ -78,4 +78,5 @@ if __name__ == "__main__":
 
         dataloader_train = torch.utils.data.DataLoader(dataset_train, batch_size=args.train_batch_size, shuffle=True)
         dataloader_test = torch.utils.data.DataLoader(dataset_test, batch_size=args.test_batch_size, shuffle=False)
+    else:
         exit('Error: unrecognized dataset')
